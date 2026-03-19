@@ -1,11 +1,11 @@
-# 🏨 Smart Hostel Management System (HMS)
+# 🏨 Hostel Monitoring System (HMS)
 
 ![Project](https://img.shields.io/badge/Project-HMS-cyan?style=for-the-badge)  
 ![Database](https://img.shields.io/badge/Database-MySQL-blue?style=for-the-badge)  
 ![AI](https://img.shields.io/badge/AI-Local_NLP-success?style=for-the-badge)  
 ![Status](https://img.shields.io/badge/Status-Production--Ready-success?style=for-the-badge)
 
-> 💡 A modern, intelligent, and fully-featured **Hostel Monitoring & Allocation System** built using **Python, Flask, and MySQL** — designed for real-world deployment.
+> 💡 A modern, intelligent, and fully-featured **Hostel Monitoring & Attendence System** built using **Python, Flask, and MySQL** — designed for real-world deployment.
 
 ---
 
@@ -52,22 +52,38 @@
 
 ```bash
 git clone <your-repo-url>
+```
+Go to root Dictonary
+```bash
 cd HMS
+```
+Making Virtual Envirnoment
+```bash
 python -m venv venv
+```
+Activating Virtual Envirnoment
+```bash
 venv\Scripts\activate
+```
+Installing Requirements 
+```bash
 pip install -r requirements.txt
 ```
 
 ### Database
-
+Creating DataBase
+Run in MySQL Server
 ```sql
 CREATE DATABASE hms_db;
 ```
 
 ### Run
-
+Initializing DataBase Details
 ```bash
 python init_db.py
+```
+Running Application
+```bash
 python app.py
 ```
 
