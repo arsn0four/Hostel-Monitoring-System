@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+
+{% block title %}System Reports - Admin{% endblock %}
+
+{% block extra_head %}
+<style>
+    .progress-fill {
+        background-color: var(--secondary);
+        height: 100%;
+        width: 0%; /* Default, overridden by inline style if needed but handled cleanly below */
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="card" style="display: flex; justify-content: space-between; align-items: center;">
+    <div>
+        <h2><i class="fa-regular fa-file-lines"></i> System Reports</h2>
+        <p>Global attendance and room occupancy statistics.</p>
+    </div>
+    <a href="{{ url_for('admin.dashboard') }}" class="btn" style="background-color: #95a5a6; color: white;"><i class="fa-solid fa-arrow-left"></i> Back to Dashboard</a>
+</div>
+
+<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+    <!-- Occupancy Report -->
+    <div class="card" style="border-top: 4px solid var(--secondary);">
+        <h3><i class="fa-solid fa-chart-pie"></i> Room Occupancy</h3>
+        <div style="font-size: 2rem; color: var(--primary); font-weight: bold; margin: 15px 0;">
+            {{ total_occupied }} / {{ total_capacity }}
+        </div>
+        <p style="color: #7f8c8d; font-size: 0.9em;">Total Beds Filled</p>
+        
+        <div class="progress-bar-container" style="width: 100%; background-color: #eee; height: 10px; border-radius: 5px; overflow: hidden; margin-top: 10px;">
+            <div class="progress-fill" style="width: {{ occupancy_percentage }}%;"></div>
+        </div>
+        <p style="text-align: right; font-size: 0.8em; color: #7f8c8d; margin-top: 5px;">{{ occupancy_percentage|round(1) }}% Filled</p>
+    </div>
+
+    <!-- Attendance Overview -->
+    <div class="card" style="border-top: 4px solid var(--success);">
+        <h3><i class="fa-solid fa-clipboard-user"></i> Today's Attendance</h3>
+        <p style="color: #7f8c8d; font-size: 0.9em;">{{ today.strftime('%B %d, %Y') }}</p>
+        
+        <div style="display: flex; justify-content: space-around; margin-top: 20px;">
+            <div style="text-align: center;">
+                <div style="font-size: 1.8rem; font-weight: bold; color: var(--text-main);">{{ total_students }}</div>
+                <div style="font-size: 0.8em; color: #7f8c8d; text-transform: uppercase;">Total Students</div>
+            </div>
+            
+            <div style="text-align: center;">
+                <div style="font-size: 1.8rem; font-weight: bold; color: var(--success);">{{ present_count }}</div>
+                <div style="font-size: 0.8em; color: #7f8c8d; text-transform: uppercase;">Present</div>
+            </div>
+            
+            <div style="text-align: center;">
+                <div style="font-size: 1.8rem; font-weight: bold; color: var(--alert);">{{ absent_count }}</div>
+                <div style="font-size: 0.8em; color: #7f8c8d; text-transform: uppercase;">Missing</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Detailed Daily Log -->
+<div class="card" style="margin-top: 20px;">
+    <h3><i class="fa-solid fa-list-check"></i> Today's Check-In Log</h3>
+    <div style="overflow-x: auto;">
+        <table>
+            <thead>
+                <tr>
+                    <th>Student Name</th>
+                    <th>Roll Number</th>
+                    <th>Room</th>
+                    <th>Status</th>
+                    <th>Check-in Time</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for record in today_records %}
+                <tr>
+                    <td>{{ record.student.user_profile.name }}</td>
+                    <td>{{ record.student.roll_number }}</td>
+                    <td>{% if record.student.room %}{{ record.student.room.room_number }}{% else %}-{% endif %}</td>
+                    <td>
+                        {% if record.status == 'Present' %}
+                        <span style="color: var(--success); font-weight: bold;">Present</span>
+                        {% elif record.status == 'Late' %}
+                        <span style="color: #f39c12; font-weight: bold;">Late</span>
+                        {% else %}
+                        <span style="color: var(--alert); font-weight: bold;">Absent</span>
+                        {% endif %}
+                    </td>
+                    <td>{% if record.checkin_time %}{{ record.checkin_time.strftime('%I:%M %p') }}{% else %}-{% endif %}</td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="5" style="text-align: center;">No check-ins recorded today.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

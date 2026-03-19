@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block title %}Warden Dashboard - HMS{% endblock %}
+
+{% block content %}
+<div class="card">
+    <h2><i class="fa-solid fa-gauge-high"></i> Warden Dashboard</h2>
+    <p>Welcome, {{ current_user.name }}! Supervise rooms and student attendance.</p>
+</div>
+
+<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px;">
+    <!-- Room Allocation Card -->
+    <div class="card" style="border-top: 4px solid var(--secondary);">
+        <h3><i class="fa-solid fa-bed"></i> Room Allocation</h3>
+        <p>Allocate students to rooms and view room occupancy.</p>
+        <a href="{{ url_for('warden.manage_rooms') }}" class="btn btn-primary" style="margin-top: 10px;">Manage Allocation <i class="fa-solid fa-arrow-right"></i></a>
+    </div>
+
+    <!-- Student Attendance Card -->
+    <div class="card" style="border-top: 4px solid var(--secondary);">
+        <h3><i class="fa-solid fa-clipboard-user"></i> Student Attendance</h3>
+        <p>Monitor daily attendance of students.</p>
+        <a href="{{ url_for('warden.view_attendance') }}" class="btn btn-primary" style="margin-top: 10px;">View Attendance <i class="fa-solid fa-arrow-right"></i></a>
+    </div>
+</div>
+{% endblock %}

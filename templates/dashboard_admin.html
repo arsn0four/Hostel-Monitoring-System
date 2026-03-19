@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Dashboard - HMS{% endblock %}
+
+{% block content %}
+<div class="card">
+    <h2><i class="fa-solid fa-gauge-high"></i> Admin Dashboard</h2>
+    <p>Welcome, {{ current_user.name }}! You have full administrative access.</p>
+</div>
+
+<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px;">
+    <!-- Manage Hostels Card -->
+    <div class="card" style="border-top: 4px solid var(--secondary);">
+        <h3><i class="fa-solid fa-building"></i> Manage Hostels</h3>
+        <p>Create hostels and assign wardens to manage them.</p>
+        <a href="{{ url_for('admin.manage_hostels') }}" class="btn btn-primary" style="margin-top: 10px;">Go to Hostels
+            <i class="fa-solid fa-arrow-right"></i></a>
+    </div>
+
+    <!-- Manage Users Card -->
+    <div class="card" style="border-top: 4px solid var(--secondary);">
+        <h3><i class="fa-solid fa-users-gear"></i> Manage Users</h3>
+        <p>Create, edit, or delete Staff, Warden, and Student accounts.</p>
+        <a href="{{ url_for('admin.manage_users') }}" class="btn btn-primary" style="margin-top: 10px;">Go to Users <i
+                class="fa-solid fa-arrow-right"></i></a>
+    </div>
+
+    <!-- Manage Rooms -->
+    <div class="card" style="border-top: 4px solid var(--secondary);">
+        <h3><i class="fa-solid fa-door-open"></i> Manage Rooms</h3>
+        <p>Manage hostel rooms and allocate students to their beds.</p>
+        <a href="{{ url_for('warden.manage_rooms') }}" class="btn btn-primary" style="margin-top: 10px;">Go to Rooms <i
+                class="fa-solid fa-arrow-right"></i></a>
+    </div>
+
+    <!-- Student Attendance Card -->
+    <div class="card" style="border-top: 4px solid var(--secondary);">
+        <h3><i class="fa-solid fa-clipboard-user"></i> Student Attendance</h3>
+        <p>Monitor daily attendance records and check-in status.</p>
+        <a href="{{ url_for('warden.view_attendance') }}" class="btn btn-primary" style="margin-top: 10px;">View
+            Attendance <i class="fa-solid fa-arrow-right"></i></a>
+    </div>
+
+    <!-- Reports Card -->
+    <div class="card" style="border-top: 4px solid var(--secondary);">
+        <h3><i class="fa-regular fa-file-lines"></i> System Reports</h3>
+        <p>View global attendance trends and occupancy analytics.</p>
+        <a href="{{ url_for('admin.reports') }}" class="btn btn-primary" style="margin-top: 10px;">Generate Reports <i
+                class="fa-solid fa-arrow-right"></i></a>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+
+{% block title %}Manage Hostels - Admin{% endblock %}
+
+{% block content %}
+<div class="card" style="display: flex; justify-content: space-between; align-items: center;">
+    <div>
+        <h2><i class="fa-solid fa-building"></i> Manage Hostels</h2>
+        <p>View and manage hostels and assign wardens.</p>
+    </div>
+    <div>
+        <a href="{{ url_for('admin.add_hostel') }}" class="btn btn-primary"><i class="fa-solid fa-plus"></i> Add New
+            Hostel</a>
+    </div>
+</div>
+
+<!-- Hostel Directory -->
+<div class="card" style="width: 100%;">
+
+    <!-- Hostel List -->
+    <div class="card">
+        <h3><i class="fa-solid fa-building"></i> Existing Hostels</h3>
+        {% if hostels %}
+        <table style="width: 100%; border-collapse: collapse;">
+            <thead>
+                <tr>
+                    <th style="padding: 10px; border-bottom: 2px solid #eee; text-align: left;">Name</th>
+                    <th style="padding: 10px; border-bottom: 2px solid #eee; text-align: left;">Location</th>
+                    <th style="padding: 10px; border-bottom: 2px solid #eee; text-align: left;">Warden</th>
+                    <th style="padding: 10px; border-bottom: 2px solid #eee; text-align: left;">Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for hostel in hostels %}
+                <tr>
+                    <td style="padding: 10px; border-bottom: 1px solid #eee;"><strong>{{ hostel.hostel_name }}</strong>
+                    </td>
+                    <td style="padding: 10px; border-bottom: 1px solid #eee;">{{ hostel.location }}</td>
+                    <td style="padding: 10px; border-bottom: 1px solid #eee;">
+                        {% if hostel.wardens %}
+                        {{ hostel.wardens[0].name }} ({{ hostel.wardens[0].phone }})
+                        {% else %}
+                        <span style="color: #e74c3c;">No Warden Assigned</span>
+                        {% endif %}
+                    </td>
+                    <td style="padding: 10px; border-bottom: 1px solid #eee;">
+                        <form method="POST" action="{{ url_for('admin.assign_warden', hostel_id=hostel.hostel_id) }}"
+                            style="display: flex; gap: 10px;">
+                            <select name="warden_id" class="form-control" style="padding: 5px; width: 120px;" required>
+                                <option value="" disabled selected>Select...</option>
+                                {% for warden in wardens %}
+                                <option value="{{ warden.warden_id }}">{{ warden.name }}</option>
+                                {% endfor %}
+                            </select>
+                            <button type="submit" class="btn btn-sm" style="padding: 5px 10px;">Assign</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <p style="text-align: center; color: #7f8c8d; padding: 20px;">No hostels added yet.</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

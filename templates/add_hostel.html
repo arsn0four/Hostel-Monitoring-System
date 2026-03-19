@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block title %}Add Hostel - Admin{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <h2><i class="fa-solid fa-plus"></i> Add New Hostel</h2>
+        <a href="{{ url_for('admin.manage_hostels') }}" class="btn" style="background-color: #95a5a6; color: white;"><i
+                class="fa-solid fa-arrow-left"></i> Back to Hostels</a>
+    </div>
+
+    <form method="POST" action="{{ url_for('admin.add_hostel') }}" style="max-width: 600px;">
+        <div class="form-group">
+            <label for="hostel_name">Hostel Name</label>
+            <input type="text" class="form-control" id="hostel_name" name="hostel_name" required
+                placeholder="E.g. Boys Hostel A">
+        </div>
+
+        <div class="form-group">
+            <label for="location">Location</label>
+            <input type="text" class="form-control" id="location" name="location" required
+                placeholder="E.g. North Campus">
+        </div>
+
+        <button type="submit" class="btn btn-primary" style="margin-top: 10px;"><i class="fa-solid fa-check"></i> Create
+            Hostel</button>
+    </form>
+</div>
+{% endblock %}

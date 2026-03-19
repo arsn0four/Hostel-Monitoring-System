@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+
+{% block extra_head %}
+<!-- Include html5-qrcode library -->
+<script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+
+{% endblock %}
+
+{% block content %}
+<div class="card">
+    <h2><i class="fa-solid fa-user-graduate"></i> Student Dashboard</h2>
+    <p>Welcome back, {{ student.name }}!</p>
+</div>
+
+<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px;">
+    <!-- My QR Code Card -->
+    <div class="card" style="border-top: 4px solid var(--success); text-align: center;">
+        <h3><i class="fa-solid fa-qrcode"></i> My Check-In QR</h3>
+        <p>Scan this QR code at the entrance to mark your attendance.</p>
+        <div
+            style="background: #f8f9fa; padding: 20px; display: inline-block; margin: 15px 0; border-radius: 8px; border: 1px dashed #ccc;">
+            <img src="{{ student.qrcode }}" alt="My QR Code" style="width: 150px; height: 150px;">
+        </div>
+        <br>
+        <a href="{{ url_for('student.checkin_scanner') }}" class="btn btn-primary">Check-In Portal <i
+                class="fa-solid fa-camera"></i></a>
+    </div>
+
+    <!-- Attendance Info Card -->
+    <div class="card" style="border-top: 4px solid var(--secondary);">
+        <h3><i class="fa-regular fa-calendar-check"></i> Recent Attendance</h3>
+        <p>Your current month's attendance record.</p>
+        <ul style="list-style: none; padding-left: 0;">
+            <li style="padding: 10px 0; border-bottom: 2px solid #eee;">
+                <strong>Today's Status:</strong>
+                {% if today_record %}
+                {% if today_record.status == 'Present' %}
+                <span style="color: var(--success); font-weight: bold;">{{ today_record.status }}</span> ({{
+                today_record.checkin_time.strftime('%I:%M %p') }})
+                {% elif today_record.status == 'Late' %}
+                <span style="color: #f39c12; font-weight: bold;">{{ today_record.status }}</span> ({{
+                today_record.checkin_time.strftime('%I:%M %p') }})
+                {% else %}
+                <span style="color: var(--alert); font-weight: bold;">{{ today_record.status }}</span>
+                {% endif %}
+                {% else %}
+                <span style="color: #95a5a6; font-weight: bold;">Not checked in yet</span>
+                {% endif %}
+            </li>
+
+            {% for record in recent_attendance %}
+            {% if record.date != today_record.date %}
+            <li style="padding: 10px 0; border-bottom: 1px solid #eee; font-size: 0.9em;">
+                <strong>{{ record.date.strftime('%b %d, %Y') }}:</strong>
+                <span
+                    style="color: {% if record.status == 'Present' %}var(--success){% elif record.status == 'Late' %}#f39c12{% else %}var(--alert){% endif %};">
+                    {{ record.status }}
+                </span>
+                {% if record.checkin_time %}({{ record.checkin_time.strftime('%I:%M %p') }}){% endif %}
+            </li>
+            {% endif %}
+            {% else %}
+            <li style="padding: 10px 0; text-align: center; color: #7f8c8d;">No recent records found.</li>
+            {% endfor %}
+        </ul>
+    </div>
+
+    <!-- Room Info Card -->
+    <div class="card" style="border-top: 4px solid var(--secondary);">
+        <h3><i class="fa-solid fa-door-closed"></i> My Room</h3>
+        <p><strong>Room Number:</strong> {% if allocation %}{{ allocation.room.room_number }}{% else %}<span
+                style="color: var(--alert);">Unassigned</span>{% endif %}</p>
+        <p><strong>Roll Number:</strong> {{ student.roll_no }}</p>
+    </div>
+</div>
+
+{% endblock %}

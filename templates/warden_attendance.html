@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+
+{% block title %}Daily Attendance - Warden{% endblock %}
+
+{% block content %}
+<div class="card" style="display: flex; justify-content: space-between; align-items: center;">
+    <div>
+        <h2><i class="fa-solid fa-clipboard-user"></i> Daily Attendance Monitoring</h2>
+        <p>Monitor daily attendance check-ins of all hostel students.</p>
+    </div>
+    <a href="{{ url_for('admin.dashboard' if current_user.role == 'Admin' else 'warden.dashboard') }}" class="btn"
+        style="background-color: #95a5a6; color: white;"><i class="fa-solid fa-arrow-left"></i> Back to Dashboard</a>
+</div>
+
+<!-- Attendance Overview -->
+<div class="card" style="border-top: 4px solid var(--success);">
+    <h3><i class="fa-solid fa-calendar-day"></i> Overview: {{ today.strftime('%B %d, %Y') }}</h3>
+
+    <div style="display: flex; justify-content: space-around; margin-top: 20px;">
+        <div style="text-align: center;">
+            <div style="font-size: 1.8rem; font-weight: bold; color: var(--text-main);">{{ total_students }}</div>
+            <div style="font-size: 0.8em; color: #7f8c8d; text-transform: uppercase;">Total Students</div>
+        </div>
+
+        <div style="text-align: center;">
+            <div style="font-size: 1.8rem; font-weight: bold; color: var(--success);">{{ present_count }}</div>
+            <div style="font-size: 0.8em; color: #7f8c8d; text-transform: uppercase;">Present Check-ins</div>
+        </div>
+
+        <div style="text-align: center;">
+            <div style="font-size: 1.8rem; font-weight: bold; color: var(--alert);">{{ absent_count }}</div>
+            <div style="font-size: 0.8em; color: #7f8c8d; text-transform: uppercase;">Missing Check-ins</div>
+        </div>
+    </div>
+</div>
+
+<!-- Detailed Daily Log -->
+<div class="card" style="margin-top: 20px;">
+    <h3><i class="fa-solid fa-list-check"></i> Check-In Log</h3>
+    <div style="overflow-x: auto;">
+        <table>
+            <thead>
+                <tr>
+                    <th>Student Name</th>
+                    <th>Roll Number</th>
+                    <th>Room</th>
+                    <th>Status</th>
+                    <th>Check-in Time</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for record in today_records %}
+                <tr>
+                    <td>{{ record.student.name }}</td>
+                    <td>{{ record.student.roll_no }}</td>
+                    <td>
+                        {% set alloc = record.student.allocations | selectattr("status", "equalto", "Active") | first %}
+                        {% if alloc %}{{ alloc.room.room_number }}{% else %}-{% endif %}
+                    </td>
+                    <td>
+                        {% if record.status == 'Present' %}
+                        <span style="color: var(--success); font-weight: bold;">Present</span>
+                        {% elif record.status == 'Late' %}
+                        <span style="color: #f39c12; font-weight: bold;">Late</span>
+                        {% else %}
+                        <span style="color: var(--alert); font-weight: bold;">Absent</span>
+                        {% endif %}
+                    </td>
+                    <td>{% if record.checkin_time %}{{ record.checkin_time.strftime('%I:%M %p') }}{% else %}-{% endif %}
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="5" style="text-align: center;">No check-ins recorded for today yet.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

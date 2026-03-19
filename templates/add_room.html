@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% block title %}Add Room - Warden{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <h2><i class="fa-solid fa-plus"></i> Add New Room</h2>
+        <a href="{{ url_for('warden.manage_rooms') }}" class="btn" style="background-color: #95a5a6; color: white;"><i
+                class="fa-solid fa-arrow-left"></i> Back to Rooms</a>
+    </div>
+
+    <form method="POST" action="{{ url_for('warden.add_room') }}" style="max-width: 600px;">
+        <div class="form-group">
+            <label for="room_number">Room Number / Name</label>
+            <input type="text" class="form-control" id="room_number" name="room_number" required
+                placeholder="E.g. 101A">
+        </div>
+
+        {% if current_user.role == 'Admin' %}
+        <div class="form-group">
+            <label for="hostel_id">Hostel</label>
+            <select class="form-control" id="hostel_id" name="hostel_id" required>
+                <option value="" disabled selected>-- Select a Hostel --</option>
+                {% for h in hostels %}
+                <option value="{{ h.hostel_id }}">{{ h.hostel_name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        {% endif %}
+
+        <div class="form-group">
+            <label for="capacity">Capacity (Beds)</label>
+            <input type="number" class="form-control" id="capacity" name="capacity" required min="1" value="2">
+        </div>
+
+        <button type="submit" class="btn btn-primary" style="margin-top: 10px;"><i class="fa-solid fa-check"></i> Create
+            Room</button>
+    </form>
+</div>
+{% endblock %}

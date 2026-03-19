@@ -1,0 +1,216 @@
+{% extends "base.html" %}
+
+{% block title %}AI Chatbot - HMS{% endblock %}
+
+{% block extra_head %}
+<!-- Include marked.js for parsing markdown in responses -->
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<style>
+    .chat-container {
+        display: flex;
+        flex-direction: column;
+        height: calc(100vh - 150px);
+        max-width: 800px;
+        margin: 0 auto;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        background-color: var(--card-bg);
+    }
+    .chat-header {
+        background-color: var(--primary);
+        color: white;
+        padding: 15px 20px;
+        font-size: 1.2rem;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    .chat-messages {
+        flex-grow: 1;
+        padding: 20px;
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+        background-color: #f8f9fa;
+    }
+    .message {
+        max-width: 80%;
+        padding: 12px 16px;
+        border-radius: 1rems;
+        position: relative;
+        line-height: 1.4;
+    }
+    .message p {
+        margin: 0;
+    }
+    .message.user {
+        align-self: flex-end;
+        background-color: var(--secondary);
+        color: white;
+        border-bottom-right-radius: 4px;
+        border-top-left-radius: 1rem;
+        border-top-right-radius: 1rem;
+        border-bottom-left-radius: 1rem;
+    }
+    .message.bot {
+        align-self: flex-start;
+        background-color: white;
+        color: var(--text-main);
+        border: 1px solid #e0e0e0;
+        border-bottom-left-radius: 4px;
+        border-top-left-radius: 1rem;
+        border-top-right-radius: 1rem;
+        border-bottom-right-radius: 1rem;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    }
+    .chat-input-area {
+        padding: 15px;
+        background-color: white;
+        border-top: 1px solid #eee;
+        display: flex;
+        gap: 10px;
+    }
+    .chat-input {
+        flex-grow: 1;
+        padding: 12px 20px;
+        border: 1px solid #ccc;
+        border-radius: 25px;
+        outline: none;
+        font-family: inherit;
+        font-size: 1rem;
+    }
+    .chat-input:focus {
+        border-color: var(--secondary);
+    }
+    .btn-send {
+        background-color: var(--secondary);
+        color: white;
+        border: none;
+        border-radius: 50%;
+        width: 45px;
+        height: 45px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        cursor: pointer;
+        transition: 0.2s;
+        font-size: 1.1rem;
+    }
+    .btn-send:hover {
+        background-color: #0097a7;
+        transform: scale(1.05);
+    }
+    .typing-indicator {
+        display: none;
+        align-self: flex-start;
+        background-color: #e0e0e0;
+        padding: 12px 16px;
+        border-radius: 1rem;
+        color: #7f8c8d;
+        font-style: italic;
+        font-size: 0.9em;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="chat-container">
+    <div class="chat-header">
+        <i class="fa-solid fa-robot fa-lg"></i> HMS AI Assistant
+    </div>
+    
+    <div class="chat-messages" id="chat-messages">
+        <!-- Initial Greeting -->
+        <div class="message bot">
+            <p>Hello, {{ current_user.name }}! 👋 I'm your HMS Assistant. How can I help you today?</p>
+            {% if current_user.role == 'Student' %}
+            <p style="font-size: 0.85em; color: #7f8c8d; margin-top: 8px;">Try asking: "What is my attendance today?" or "What is my room number?"</p>
+            {% else %}
+            <p style="font-size: 0.85em; color: #7f8c8d; margin-top: 8px;">Try asking: "How many beds are available?" or "Who is absent today?"</p>
+            {% endif %}
+        </div>
+        
+        <div id="typing-indicator" class="typing-indicator">
+            <i class="fa-solid fa-ellipsis fa-fade"></i> AI is thinking...
+        </div>
+    </div>
+    
+    <form class="chat-input-area" id="chat-form">
+        <input type="text" id="user-input" class="chat-input" placeholder="Type your message here..." autocomplete="off" required>
+        <button type="submit" class="btn-send"><i class="fa-solid fa-paper-plane"></i></button>
+    </form>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const chatForm = document.getElementById('chat-form');
+        const userInput = document.getElementById('user-input');
+        const chatMessages = document.getElementById('chat-messages');
+        const typingIndicator = document.getElementById('typing-indicator');
+
+        function appendMessage(text, sender) {
+            const msgDiv = document.createElement('div');
+            msgDiv.classList.add('message', sender);
+            
+            if (sender === 'bot') {
+                // Parse markdown for bot responses
+                msgDiv.innerHTML = marked.parse(text);
+            } else {
+                // Escape user input to prevent XSS
+                const p = document.createElement('p');
+                p.textContent = text;
+                msgDiv.appendChild(p);
+            }
+            
+            // Insert before typing indicator
+            chatMessages.insertBefore(msgDiv, typingIndicator);
+            scrollToBottom();
+        }
+
+        function scrollToBottom() {
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        chatForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const text = userInput.value.trim();
+            if (!text) return;
+            
+            // Add user message to UI
+            appendMessage(text, 'user');
+            userInput.value = '';
+            
+            // Show typing indicator
+            typingIndicator.style.display = 'block';
+            scrollToBottom();
+            
+            // Send to backend
+            fetch("{{ url_for('chatbot.handle_query') }}", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ query: text })
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Hide typing
+                typingIndicator.style.display = 'none';
+                
+                // Add bot response
+                appendMessage(data.response, 'bot');
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                typingIndicator.style.display = 'none';
+                appendMessage("Sorry, I encountered an error. Please try again later.", 'bot');
+            });
+        });
+    });
+</script>
+{% endblock %}

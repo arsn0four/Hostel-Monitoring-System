@@ -1,0 +1,12 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+.env
+*.db
+.vscode/
+.idea/
+*.log
+static/qrcodes/*.png
+!static/qrcodes/.gitkeep

@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+
+{% block title %}Manage Rooms - Warden{% endblock %}
+
+{% block content %}
+<div class="card" style="display: flex; justify-content: space-between; align-items: center;">
+    <div>
+        <h2><i class="fa-solid fa-door-open"></i> Manage Rooms</h2>
+        <p>View room capacities and manage new rooms.</p>
+    </div>
+    <div style="display: flex; gap: 10px;">
+        <a href="{{ url_for('warden.add_room') }}" class="btn btn-primary"><i class="fa-solid fa-plus"></i> Add New
+            Room</a>
+        {% if current_user.role == 'Admin' %}
+        <a href="{{ url_for('admin.dashboard') }}" class="btn" style="background-color: #95a5a6; color: white;"><i
+                class="fa-solid fa-arrow-left"></i> Back to Dashboard</a>
+        {% else %}
+        <a href="{{ url_for('warden.dashboard') }}" class="btn" style="background-color: #95a5a6; color: white;"><i
+                class="fa-solid fa-arrow-left"></i> Back to Dashboard</a>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Room Directory -->
+<div class="card" style="width: 100%;">
+
+    <!-- Room List -->
+    <div class="card">
+        <h3><i class="fa-solid fa-list"></i> Room Directory</h3>
+        <div style="overflow-x: auto;">
+            {% for hostel_name, hostel_rooms in rooms|groupby('hostel.hostel_name') %}
+            <h4 style="margin-top: 20px; color: var(--secondary); border-bottom: 2px solid #eee; padding-bottom: 5px;">
+                <i class="fa-solid fa-building"></i> {{ hostel_name }}</h4>
+            <table style="margin-bottom: 20px; width: 100%;">
+                <thead>
+                    <tr>
+                        <th style="width: 20%;">Room Number</th>
+                        <th style="width: 20%;">Capacity</th>
+                        <th style="width: 20%;">Occupancy</th>
+                        <th style="width: 20%;">Status</th>
+                        <th style="width: 20%;">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for room in hostel_rooms %}
+                    <tr>
+                        <td><strong>{{ room.room_number }}</strong></td>
+                        <td>{{ room.capacity }} beds</td>
+                        <td>{{ room.current_occupancy }} / {{ room.capacity }}</td>
+                        <td>
+                            {% if room.current_occupancy >= room.capacity %}
+                            <span style="color: var(--alert); font-weight: bold;">Full</span>
+                            {% elif room.current_occupancy == 0 %}
+                            <span style="color: #95a5a6; font-weight: bold;">Empty</span>
+                            {% else %}
+                            <span style="color: var(--success); font-weight: bold;">Available</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <a href="{{ url_for('warden.allocate_room', room_id=room.room_id) }}"
+                                class="btn btn-primary" style="padding: 5px 10px; font-size: 0.9em;"><i
+                                    class="fa-solid fa-users"></i>
+                                Allocate</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <p style="text-align: center; color: #7f8c8d; padding: 20px;">No rooms created yet.</p>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}

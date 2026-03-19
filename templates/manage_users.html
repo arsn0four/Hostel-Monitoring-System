@@ -1,0 +1,205 @@
+{% extends "base.html" %}
+
+{% block title %}Manage Users - Admin{% endblock %}
+
+{% block content %}
+<div class="card" style="display: flex; justify-content: space-between; align-items: center;">
+    <div>
+        <h2><i class="fa-solid fa-users-gear"></i> Manage Users</h2>
+        <p>View and manage all system users.</p>
+    </div>
+    <div>
+        <a href="{{ url_for('admin.add_user') }}" class="btn btn-primary"><i class="fa-solid fa-user-plus"></i> Add New
+            User</a>
+    </div>
+</div>
+
+<!-- User Groups -->
+<style>
+    .user-table {
+        width: 100%;
+        border-collapse: collapse;
+        table-layout: fixed;
+        /* Ensures consistent column widths */
+    }
+
+    .user-table th,
+    .user-table td {
+        padding: 12px 15px;
+        text-align: left;
+        border-bottom: 1px solid #eee;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    /* Fixed Column Widths */
+    .col-name {
+        width: 30%;
+    }
+
+    .col-user {
+        width: 25%;
+    }
+
+    .col-data {
+        width: 30%;
+    }
+
+    /* Contact or Roll Number */
+    .col-acts {
+        width: 15%;
+        text-align: right !important;
+    }
+
+    .role-header {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 15px;
+    }
+
+    .role-header h3 {
+        margin-bottom: 0;
+    }
+</style>
+
+<div class="user-sections">
+    <!-- Admins Section -->
+    <div class="card" style="border-top: 4px solid #ffeaa7;">
+        <div class="role-header">
+            <h3><i class="fa-solid fa-user-shield" style="color: #d35400;"></i> Administrators</h3>
+        </div>
+        <div style="overflow-x: auto;">
+            <table class="user-table">
+                <thead>
+                    <tr>
+                        <th class="col-name">Name</th>
+                        <th class="col-user">Username</th>
+                        <th class="col-data">Contact Info</th>
+                        <th class="col-acts">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for user in users if user.role == 'Admin' %}
+                    <tr>
+                        <td class="col-name"><strong>System Admin</strong></td>
+                        <td class="col-user">{{ user.username }}</td>
+                        <td class="col-data">-</td>
+                        <td class="col-acts">
+                            {% if user.username != 'admin' %}
+                            <form action="{{ url_for('admin.delete_user', user_id=user.id) }}" method="POST"
+                                style="display:inline;" onsubmit="return confirm('Delete this Admin?');">
+                                <button type="submit" class="btn btn-danger"
+                                    style="padding: 5px 10px; font-size: 0.85em;"><i
+                                        class="fa-solid fa-trash"></i></button>
+                            </form>
+                            {% else %}
+                            <span style="color: #95a5a6; font-size: 0.85em;"><i class="fa-solid fa-lock"></i>
+                                System</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Wardens Section -->
+    <div class="card" style="border-top: 4px solid #81ecec; margin-top: 30px;">
+        <div class="role-header">
+            <h3><i class="fa-solid fa-user-tie" style="color: #00b894;"></i> Wardens</h3>
+        </div>
+        <div style="overflow-x: auto;">
+            <table class="user-table">
+                <thead>
+                    <tr>
+                        <th class="col-name">Name</th>
+                        <th class="col-user">Username</th>
+                        <th class="col-data">Contact Info</th>
+                        <th class="col-acts">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% set wardens = users | selectattr('role', 'equalto', 'Warden') | list %}
+                    {% for user in wardens %}
+                    <tr>
+                        <td class="col-name"><strong>{{ user.warden_profile.name if user.warden_profile else 'Unnamed
+                                Warden' }}</strong></td>
+                        <td class="col-user">{{ user.username }}</td>
+                        <td class="col-data">{{ user.warden_profile.phone if user.warden_profile else '-' }}</td>
+                        <td class="col-acts">
+                            <form action="{{ url_for('admin.delete_user', user_id=user.id) }}" method="POST"
+                                style="display:inline;" onsubmit="return confirm('Delete this Warden?');">
+                                <button type="submit" class="btn btn-danger"
+                                    style="padding: 5px 10px; font-size: 0.85em;"><i
+                                        class="fa-solid fa-trash"></i></button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                    {% if not wardens %}
+                    <tr>
+                        <td colspan="4" style="text-align: center; color: #95a5a6; padding: 20px;">No wardens
+                            registered.</td>
+                    </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Students Section -->
+    <div class="card" style="border-top: 4px solid #fdcb6e; margin-top: 30px;">
+        <div class="role-header">
+            <h3><i class="fa-solid fa-user-graduate" style="color: #2d3436;"></i> Students</h3>
+        </div>
+        <div style="overflow-x: auto;">
+            <table class="user-table">
+                <thead>
+                    <tr>
+                        <th class="col-name">Name</th>
+                        <th class="col-user">Username</th>
+                        <th class="col-data">Roll Number</th>
+                        <th class="col-acts">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% set students = users | selectattr('role', 'equalto', 'Student') | list %}
+                    {% for user in students %}
+                    <tr>
+                        <td class="col-name"><strong>{{ user.student_profile.name if user.student_profile else 'Unnamed
+                                Student' }}</strong></td>
+                        <td class="col-user">{{ user.username }}</td>
+                        <td class="col-data">
+                            {% if user.student_profile %}
+                            <code
+                                style="background: #f0f2f5; padding: 4px 8px; border-radius: 4px; font-weight: 500;">{{ user.student_profile.roll_no }}</code>
+                            {% else %}
+                            <span style="color: var(--alert); font-size: 0.85em;"><i
+                                    class="fa-solid fa-circle-exclamation"></i> No Profile</span>
+                            {% endif %}
+                        </td>
+                        <td class="col-acts">
+                            <form action="{{ url_for('admin.delete_user', user_id=user.id) }}" method="POST"
+                                style="display:inline;" onsubmit="return confirm('Delete this Student?');">
+                                <button type="submit" class="btn btn-danger"
+                                    style="padding: 5px 10px; font-size: 0.85em;"><i
+                                        class="fa-solid fa-trash"></i></button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                    {% if not students %}
+                    <tr>
+                        <td colspan="4" style="text-align: center; color: #95a5a6; padding: 20px;">No students
+                            registered.</td>
+                    </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

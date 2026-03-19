@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+
+{% block title %}Allocate Room - {{ room.room_number }}{% endblock %}
+
+{% block content %}
+<div class="card" style="display: flex; justify-content: space-between; align-items: center;">
+    <div>
+        <h2><i class="fa-solid fa-bed"></i> Room Allocation: {{ room.room_number }}</h2>
+        <p>Capacity: {{ room.current_occupancy }} / {{ room.capacity }} beds filled</p>
+    </div>
+    <a href="{{ url_for('warden.manage_rooms') }}" class="btn" style="background-color: #95a5a6; color: white;"><i
+            class="fa-solid fa-arrow-left"></i> Back to Rooms</a>
+</div>
+
+<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+    <!-- Allocation Form -->
+    <div class="card">
+        <h3><i class="fa-solid fa-user-plus"></i> Assign Student</h3>
+        {% if room.current_occupancy >= room.capacity %}
+        <div class="alert alert-danger">
+            <i class="fa-solid fa-triangle-exclamation"></i> This room is currently at maximum capacity.
+        </div>
+        {% else %}
+        <form method="POST" action="{{ url_for('warden.allocate_room', room_id=room.room_id) }}">
+            <div class="form-group">
+                <label for="student_id">Select Student</label>
+                <select class="form-control" id="student_id" name="student_id" required>
+                    <option value="" disabled selected>-- Select a student --</option>
+                    {% for student in available_students %}
+                    <option value="{{ student.student_id }}">{{ student.name }} ({{ student.roll_no }})
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <button type="submit" class="btn btn-primary" style="width: 100%;"><i class="fa-solid fa-check"></i> Assign
+                to Room</button>
+        </form>
+        {% endif %}
+    </div>
+
+    <!-- Current Occupants -->
+    <div class="card">
+        <h3><i class="fa-solid fa-users"></i> Current Occupants</h3>
+        <ul style="list-style: none; padding-left: 0;">
+            {% for student in current_students %}
+            <li
+                style="padding: 15px; border: 1px solid #eee; border-radius: 6px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; background-color: #f8f9fa;">
+                <div>
+                    <strong><i class="fa-solid fa-user"></i> {{ student.name }}</strong><br>
+                    <span style="font-size: 0.9em; color: #7f8c8d;">Roll Number: {{ student.roll_no }}</span>
+                </div>
+                <!-- Remove from room button could go here -->
+                <span class="badge"
+                    style="background-color: var(--secondary); color: white; padding: 4px 8px; border-radius: 12px; font-size: 0.8em;">Occupant</span>
+            </li>
+            {% else %}
+            <li style="padding: 15px; text-align: center; color: #7f8c8d; font-style: italic;">
+                This room is currently empty.
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>
+{% endblock %}

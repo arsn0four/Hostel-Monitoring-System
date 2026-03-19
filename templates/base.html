@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Hostel Monitoring System{% endblock %}</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #2C3E50; /* Charcoal Gray */
+            --secondary: #00BCD4; /* Cyan Blue */
+            --bg-color: #ECF0F1; /* Light Gray */
+            --card-bg: #FFFFFF;
+            --text-main: #34495E; /* Dark Slate */
+            --alert: #E74C3C; /* Red */
+            --success: #2ECC71; /* Green */
+            --shadow: 0 4px 6px rgba(189, 195, 199, 0.4);
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar Navigation */
+        .sidebar {
+            width: 250px;
+            min-width: 250px; /* Prevent shrinking */
+            flex-shrink: 0;
+            background-color: var(--primary);
+            color: white;
+            display: flex;
+            flex-direction: column;
+            transition: 0.3s;
+        }
+
+        .sidebar-header {
+            padding: 20px;
+            text-align: center;
+            font-size: 1.2rem;
+            font-weight: 700;
+            background-color: rgba(0,0,0,0.1);
+        }
+
+        .sidebar a {
+            color: white;
+            text-decoration: none;
+            padding: 15px 20px;
+            display: block;
+            border-left: 4px solid transparent;
+            transition: 0.2s;
+        }
+
+        .sidebar a:hover, .sidebar a.active {
+            background-color: rgba(0, 188, 212, 0.1);
+            border-left: 4px solid var(--secondary);
+            color: var(--secondary);
+        }
+
+        .sidebar a i {
+            margin-right: 10px;
+        }
+
+        /* Main Content */
+        .main-content {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+        }
+
+        .top-navbar {
+            background-color: var(--card-bg);
+            padding: 15px 30px;
+            box-shadow: var(--shadow);
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+        }
+
+        .btn-logout {
+            background-color: transparent;
+            color: var(--alert);
+            border: 1px solid var(--alert);
+            padding: 8px 15px;
+            border-radius: 6px;
+            text-decoration: none;
+            transition: 0.3s;
+        }
+
+        .btn-logout:hover {
+            background-color: var(--alert);
+            color: white;
+        }
+
+        .content-area {
+            padding: 30px;
+            flex-grow: 1;
+        }
+
+        /* Helper Classes */
+        .card {
+            background-color: var(--card-bg);
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+            margin-bottom: 20px;
+        }
+
+        h1, h2, h3 {
+            margin-top: 0;
+            color: var(--primary);
+        }
+
+        .flash-messages {
+            margin-bottom: 20px;
+        }
+
+        .alert {
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 10px;
+            color: white;
+        }
+
+        .alert-success { background-color: var(--success); }
+        .alert-danger { background-color: var(--alert); }
+        .alert-info { background-color: var(--secondary); }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            transition: 0.3s;
+            font-weight: 500;
+        }
+
+        .btn-primary { background-color: var(--secondary); color: white; }
+        .btn-primary:hover { background-color: #0097a7; }
+        
+        /* Table Styles */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+        
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        th {
+            background-color: var(--primary);
+            color: white;
+        }
+        
+        tr:hover {
+            background-color: rgba(0,0,0,0.02);
+        }
+
+        /* Forms */
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; margin-bottom: 5px; font-weight: 500; }
+        .form-control {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            box-sizing: border-box;
+            font-family: 'Roboto', sans-serif;
+        }
+        .form-control:focus {
+            border-color: var(--secondary);
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(0, 188, 212, 0.2);
+        }
+
+        /* --- Global Chatbot Widget --- */
+        #chatbot-bubble {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 60px;
+            height: 60px;
+            background-color: var(--secondary);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 24px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            cursor: pointer;
+            transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            z-index: 2000;
+        }
+        #chatbot-bubble:hover {
+            transform: scale(1.1) rotate(5deg);
+        }
+        #chatbot-window {
+            position: fixed;
+            bottom: 100px;
+            right: 30px;
+            width: 380px;
+            height: 500px;
+            background-color: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            display: none;
+            flex-direction: column;
+            overflow: hidden;
+            z-index: 2000;
+            transition: 0.3s;
+            border: 1px solid #eee;
+        }
+        .chat-header {
+            background-color: var(--primary);
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .chat-messages {
+            flex-grow: 1;
+            padding: 15px;
+            overflow-y: auto;
+            background-color: #f9f9f9;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .message {
+            max-width: 85%;
+            padding: 10px 14px;
+            border-radius: 18px;
+            font-size: 0.95rem;
+            line-height: 1.4;
+        }
+        .message.bot {
+            align-self: flex-start;
+            background-color: white;
+            border: 1px solid #e0e0e0;
+            border-bottom-left-radius: 2px;
+        }
+        .message.user {
+            align-self: flex-end;
+            background-color: var(--secondary);
+            color: white;
+            border-bottom-right-radius: 2px;
+        }
+        .message p { margin: 0; }
+        .chat-input-area {
+            padding: 15px;
+            border-top: 1px solid #eee;
+            display: flex;
+            gap: 8px;
+        }
+        .chat-input {
+            flex-grow: 1;
+            padding: 10px 15px;
+            border: 1px solid #ddd;
+            border-radius: 20px;
+            outline: none;
+        }
+        .btn-send {
+            background-color: var(--secondary);
+            color: white;
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+        .typing {
+            font-size: 0.85em;
+            color: #7f8c8d;
+            margin-bottom: 10px;
+            display: none;
+        }
+        .chat-suggestions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            padding: 10px 15px;
+            border-top: 1px solid #eee;
+            background-color: #fff;
+        }
+        .suggestion-chip {
+            background-color: #f0f2f5;
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: 0.2s;
+            border: 1px solid #e0e0e0;
+            color: var(--text-main);
+        }
+        .suggestion-chip:hover {
+            background-color: var(--secondary);
+            color: white;
+            border-color: var(--secondary);
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    {% block extra_head %}{% endblock %}
+</head>
+<body>
+
+    {% if current_user.is_authenticated %}
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <i class="fa-solid fa-building-user"></i> HMS
+        </div>
+        
+        {% if current_user.role == 'Admin' %}
+            <a href="{{ url_for('admin.dashboard') }}" class="{% if request.endpoint == 'admin.dashboard' %}active{% endif %}">
+                <i class="fa-solid fa-chart-pie"></i> Dashboard
+            </a>
+            <!-- Additional admin links will go here -->
+        {% elif current_user.role == 'Warden' %}
+            <a href="{{ url_for('warden.dashboard') }}" class="{% if request.endpoint == 'warden.dashboard' %}active{% endif %}">
+                <i class="fa-solid fa-chart-pie"></i> Dashboard
+            </a>
+        {% elif current_user.role == 'Student' %}
+            <a href="{{ url_for('student.dashboard') }}" class="{% if request.endpoint == 'student.dashboard' %}active{% endif %}">
+                <i class="fa-solid fa-user"></i> My Profile
+            </a>
+        {% endif %}
+    </div>
+    {% endif %}
+
+    <div class="main-content">
+        {% if current_user.is_authenticated %}
+        <div class="top-navbar">
+            <div style="margin-right: 20px; font-weight: 500;">
+                <i class="fa-regular fa-circle-user"></i> {{ current_user.name }} ({{ current_user.role }})
+            </div>
+            <a href="{{ url_for('auth.logout') }}" class="btn-logout">
+                <i class="fa-solid fa-arrow-right-from-bracket"></i> Logout
+            </a>
+        </div>
+        {% endif %}
+
+        <div class="content-area">
+            <div class="flash-messages">
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        {% for category, message in messages %}
+                            <div class="alert alert-{{ category }}">{{ message }}</div>
+                        {% endfor %}
+                    {% endif %}
+                {% endwith %}
+            </div>
+
+            {% block content %}{% endblock %}
+        </div>
+    </div>
+
+    {% block extra_js %}{% endblock %}
+
+    {% if current_user.is_authenticated %}
+    <!-- Chatbot Widget -->
+    <div id="chatbot-bubble">
+        <i class="fa-solid fa-robot"></i>
+    </div>
+
+    <div id="chatbot-window">
+        <div class="chat-header">
+            <span><i class="fa-solid fa-robot"></i> HMS Assistant</span>
+            <i class="fa-solid fa-times" id="close-chat" style="cursor:pointer;"></i>
+        </div>
+        <div class="chat-messages" id="chat-messages">
+            <div class="message bot">
+                <p>Hello! I'm your HMS Assistant. How can I help you today?</p>
+            </div>
+            <div id="chat-typing" class="typing">AI is thinking...</div>
+        </div>
+        <div class="chat-suggestions" id="chat-suggestions">
+            {% if current_user.role == 'Student' %}
+                <span class="suggestion-chip" data-query="My attendance today">Attendance</span>
+                <span class="suggestion-chip" data-query="What is my room number?">Room</span>
+                <span class="suggestion-chip" data-query="Hostel rules">Rules</span>
+                <span class="suggestion-chip" data-query="Mess timings">Mess Menu</span>
+            {% else %}
+                <span class="suggestion-chip" data-query="Beds available">Occupancy</span>
+                <span class="suggestion-chip" data-query="Who is absent today?">Absences</span>
+                <span class="suggestion-chip" data-query="Mess schedule">Mess Info</span>
+            {% endif %}
+            <span class="suggestion-chip" data-query="Emergency contacts">Help</span>
+        </div>
+        <form class="chat-input-area" id="chat-widget-form">
+            <input type="text" id="chat-widget-input" class="chat-input" placeholder="Ask something..." autocomplete="off" required>
+            <button type="submit" class="btn-send"><i class="fa-solid fa-paper-plane"></i></button>
+        </form>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const bubble = document.getElementById('chatbot-bubble');
+            const window = document.getElementById('chatbot-window');
+            const closeBtn = document.getElementById('close-chat');
+            const chatForm = document.getElementById('chat-widget-form');
+            const chatInput = document.getElementById('chat-widget-input');
+            const chatMessages = document.getElementById('chat-messages');
+            const typingIndicator = document.getElementById('chat-typing');
+
+            bubble.onclick = () => {
+                window.style.display = window.style.display === 'flex' ? 'none' : 'flex';
+                if (window.style.display === 'flex') chatInput.focus();
+            };
+
+            closeBtn.onclick = () => {
+                window.style.display = 'none';
+            };
+
+            function appendMsg(text, sender) {
+                const div = document.createElement('div');
+                div.classList.add('message', sender);
+                if (sender === 'bot') {
+                    div.innerHTML = marked.parse(text);
+                } else {
+                    const p = document.createElement('p');
+                    p.textContent = text;
+                    div.appendChild(p);
+                }
+                chatMessages.insertBefore(div, typingIndicator);
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            }
+
+            function sendQuery(query) {
+                if (!query) return;
+                appendMsg(query, 'user');
+                chatInput.value = '';
+                typingIndicator.style.display = 'block';
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+
+                fetch("{{ url_for('chatbot.handle_query') }}", {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ query: query })
+                })
+                .then(r => r.json())
+                .then(data => {
+                    typingIndicator.style.display = 'none';
+                    appendMsg(data.response, 'bot');
+                })
+                .catch(() => {
+                    typingIndicator.style.display = 'none';
+                    appendMsg("Error connecting to assistant.", 'bot');
+                });
+            }
+
+            // Handle chip clicks
+            document.querySelectorAll('.suggestion-chip').forEach(chip => {
+                chip.onclick = () => {
+                    sendQuery(chip.getAttribute('data-query'));
+                };
+            });
+
+            chatForm.onsubmit = (e) => {
+                e.preventDefault();
+                sendQuery(chatInput.value.trim());
+            };
+        });
+    </script>
+    {% endif %}
+</body>
+</html>
